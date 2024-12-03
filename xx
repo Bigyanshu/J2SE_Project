@@ -1,0 +1,280 @@
+import java.awt.*;
+import javax.swing.border.*;
+import javax.swing.*;
+import java.awt.event.*;
+import java.sql.*;
+
+public class Eiprs_DeptApp implements ActionListener
+{
+	JFrame f1;
+	JPanel p1,p2,p3;
+	GridLayout gl42,gl31;
+	JButton btnClear,btnSave,btnNext,btnPrevious,btnSearch,btnDelete,btnUpdate,btnClose;
+	JLabel lblDCode,lblDName,lblPhone,lblHOD,lblHead;
+	JTextField txtDName,txtDCode,txtPhone,txtHOD;
+	FlowLayout flw;
+	ImageIcon imgNext;
+	Color red,black;
+	Box hb,vb;
+	Connection conn;
+	Statement stmtInsert,stmtSelect,stmtDelete,stmtUpdate;
+	String Dcode,Dname,Phone,HOD;
+	ResultSet rs;		
+	Font fnt1,fnt2;
+	JOptionPane dlg;
+	int choice;
+	//Border lineb1, lineb2, lineb3;
+	String mid;
+	
+	//Constructor start
+	public Eiprs_DeptApp("Division By 0")
+	{
+		f1=new JFrame();
+		
+		p1=new JPanel();
+		p2=new JPanel();
+		p3=new JPanel();
+		
+		gl42=new GridLayout(4,2);
+		gl31=new GridLayout(3,1);
+		
+		flw=new FlowLayout();
+		
+		dlg=new JOptionPane();
+		
+		//Color 
+		red=new Color(125,0,0);
+		black=new Color(200,200,200);
+		
+		//Label Declaration
+		lblHead=new JLabel("DEPARTMENT INFORMATION");
+		fnt1=new Font("Times New Roman",Font.BOLD,26);
+		fnt2=new Font("Times New Roman",Font.PLAIN,26);
+		lblHead.setFont(fnt1);
+		lblHead.setFont(fnt2);
+		lblHead.setForeground(Color.red);
+		lblHead.setBackground(Color.Black);
+		lblDCode=new JLabel("Department Code:");		
+		lblDName=new JLabel("Department Name:");
+		lblPhone=new JLabel("Phone Number:");
+		lblHOD=new JLabel("Head of Department:");
+		
+		//TextField Declaration
+		txtDCode=new JTextField(50);
+		txtDName=new JTextField(50);
+		txtPhone=new JTextField(50);
+		txtHOD=new JTextField(50);
+		
+		//Buttons Adding
+		imgNext=new ImageIcon("INext1.png");
+		btnClear=new JButton("Clear");
+		btnSave=new JButton("Save");
+		btnNext=new JButton("Next",imgNext);
+		btnPrevious=new JButton("Previous");
+		btnSearch=new JButton("Search");
+		btnDelete=new JButton("Delete");
+		btnUpdate=new JButton("Update");
+		btnClose=new JButton("Close");
+		
+		//Horizontal & Vertical Box oblect creating
+		vb=Box.createVerticalBox();
+		hb=Box.createHorizontalBox();
+		
+		//set Panel
+		p1.setLayout(flw);
+		p1.add(lblHead);
+		
+		p2.setLayout(gl92);
+		p2.add(lblDCode);
+		p2.add(txtDCode);
+		p2.add(lblDName);
+		p2.add(txtDName);
+		p2.add(lblPhone);
+		p2.add(txtPhone);
+		p2.add(lblHOD);
+		p2.add(txtHOD);
+		
+		p3.setLayout(flw);
+		p3.add(btnClear);
+		p3.add(btnSave);
+		p3.add(btnNext);
+		p3.add(btnPrevious);
+		p3.add(btnSearch);
+		p3.add(btnDelete);
+		p3.add(btnUpdate);
+		p3.add(btnClose);
+		
+		
+		vb.add(Box.createVerticalStrut(10));
+		vb.add(p1);
+		vb.add(Box.createVerticalStrut(10));
+		
+		vb.add(p2);
+		vb.add(Box.createVerticalStrut(20));
+		vb.add(p3);
+		vb.add(Box.createVerticalStrut(10));
+
+		hb.add(Box.createHorizontalStrut(20));
+		hb.add(vb);
+		hb.add(Box.createHorizontalStrut(20));
+		
+		//Set Frame
+		f1.setLayout(new BorderLayout());
+		f1.add(hb,BorderLayout.CENTER);
+		
+		f1.setBounds(280,80,800,550);
+		doConnect();
+		f1.setVisible(true);
+	}
+	public void doConnect() 
+	{
+		try
+		{
+			Class.forName("com.mysql.jdbc.Driver");
+		}
+		catch(ClassNotFoundException cnfe)
+		{
+			System.out.println("Unable to Load Driver");
+		}
+		try
+		{
+			conn=DriverManager.getConnection("jdbc:mysql://localhost:3307/eiprsdb","root","root1");
+			stmtSelect=conn.createStatement();
+			rs=stmtSelect.executeQuery("select * from eiprs_tblDepartment");
+		}
+		catch(SQLException se)
+		{
+			System.out.println("Unable to Fetch Data:"+se);
+		} 
+	}
+	public void actionPerformed(ActionEvent ae)
+	{
+		if(ae.getSource()==btnClear){
+			txtDCode.setText("");
+			txtDName.setText("");
+			txtPhone.setText("");
+			txtHOD.setText("");
+		}
+		else if(ae.getSource()==btnClose){
+			f1.setVisible(false);
+			f1.dispose();
+		}
+		else if(ae.getSource()==btnSave){
+			Dcode=txtDcode.getText();
+			Dname=txtDname.getText();
+			Phone=txtPhone.getText();
+			HOD=txtHOD.getText();
+			try{
+				stmtInsert=conn.createStatement();
+				stmtInsert.executeUpdate("insert into eiprs_tblDepartment values('"+Dcode+"','"+Dname+"','"+Phone+"','"+HOD+"')");
+				//System.out.println("One Record Saved Successfully");
+				dlg.showMessageDialog(f1,"One Record Saved Successfully","EIPRS",1);
+			}
+			catch(SQLException se){
+				//System.out.println("Unable to Save Records !");
+				dlg.showMessageDialog(f1,"Unable to Save Records !","EIPRS",1);
+
+			}
+		}
+		else if(ae.getSource()==btnNext){
+			try{
+				rs.next();
+				Dcode=rs.getString("Dcode");//string name--->column name
+				Dname=rs.getString("Dname");
+				Phone=rs.getString("Phone");
+				HOD=rs.getString("HOD");
+				
+				txtDcode.setText(Dcode);
+				txtDname.setText(Dname);
+				txtPhone.setText(Phone);
+				txtHOD.setText(HOD);
+			}
+			catch(SQLException se)
+			{
+				System.out.println("Unable to go Next !"+se);
+			}
+		}
+		else if(ae.getSource()==btnPrevious)
+		{
+			try
+			{
+				rs.previous();
+				Dcode=rs.getString("Dcode");
+				Dname=rs.getString("Dname");
+				Phone=rs.getString("Phone");
+				HOD=rs.getString("HOD");
+
+				txtDcode.setText(Dcode);
+				txtDname.setText(Dname);
+				txtPhone.setText(Phone);
+				txtHOD.setText(HOD);
+			}
+			catch(SQLException se)
+			{
+				System.out.println("Unable to Go Previous");
+			}
+		}
+		else if(ae.getSource()==btnSearch)
+		{/*
+			try
+			{
+				mid=dlg.showInputDialog(f1,"Enter Dname:","Alert",1);
+			}
+			catch(SQLException se)
+			{
+				
+			}
+			*/
+		}
+		else if(ae.getSource()==btnDelete)
+		{
+			DName=txtDname.getText();
+			try
+			{
+				
+				choice=dlg.showConfirmDialog(f1,"Sure to Delete ?","Alert",1);
+				if(choice==0)
+				{
+				stmtDelete=conn.createStatement();
+				stmtDelete.executeUpdate("Delete From eiprs_tblDepartment where DName='"+Dname+"'");
+				dlg.showMessageDialog(f1,"One Record Deleted Successfully","EIPRS",3);
+				}
+				else
+				{
+					//System.out.println("ThankFul Data Not Deleting");
+					dlg.showMessageDialog(f1,"ThankFul Data Not Deleting","EIPRS",2);
+
+				}
+			}
+			catch(SQLException se){
+				dlg.showMessageDialog(f1,"Unable to Delete. Try again later","EIPRS",2);
+			}
+		}
+		else if(ae.getSource()==btnUpdate)
+		{	
+			Dcode=txtDcode.getText();
+			Dname=txtDname.getText();
+			Phone=txtPhone.getText();
+			HOD=txtHOD.getText();
+			try
+			{
+				stmtUpdate=conn.createStatement();
+				stmtUpdate.executeUpdate("Update eiprs_tblDepartment set Dcode='"+Dcode+"',Dname='"+Dname+"',Phone='"+Phone+"',HOD='"+HOD+"' where Dname='"+Dname+"'");
+				//System.out.println("One Record Updated");
+				dlg.showMessageDialog(f1,"One Record Updated Successfully","EIPRS",1);
+			}
+			catch(SQLException se)
+			{
+				System.out.println("Unable to Update"+se);
+			}
+		}
+	}
+}
+class Eiprs_Department
+{
+	public static void main(String []s)
+	{
+		eiprs_tblDeptApp=ed;
+		ed=new eiprs_tblDeptApp();
+	}
+}
